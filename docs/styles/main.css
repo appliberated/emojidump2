@@ -1,0 +1,66 @@
+body {
+    color: #000;
+    font-family: Consolas, monaco, monospace;
+}
+
+p {
+    margin: 0 0 1rem 0;
+}
+
+.hidden {
+    display: none;
+}
+
+.main {
+    padding: 1rem;
+}
+
+.dump {
+    color: #ccc;
+    font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", Times, Symbola, Aegyptus, Code2000, Code2001, Code2002, Musica, serif, LastResort;
+    font-size: 2rem;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+    word-break: break-all;
+}
+
+.dump[data-zoom="1"] {
+    font-size: 1rem;
+    line-height: 1.25;
+}
+
+.dump[data-zoom="2"] {
+    font-size: 1.5rem;
+    line-height: 1.25;    
+}
+
+.dump[data-zoom="3"] {
+    font-size: 2rem;
+    line-height: 1.5;
+}
+
+.dump[data-zoom="4"] {
+    font-size: 2.5rem;
+    line-height: 1.5;
+}
+
+.dump[data-zoom="5"] {
+    font-size: 3rem;
+    line-height: 1.75;
+}
+
+.dump[data-zoom="6"] {
+    font-size: 3.5rem;
+    line-height: 1.75;
+}
+
+.dump[data-zoom="7"] {
+    font-size: 4rem;
+    line-height: 1.75;
+}
+
+.feedback--error {
+    color: #FF0000;
+    font-weight: bold;
+}
+
