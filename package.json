@@ -10,7 +10,7 @@
             "browser": true,
             "es6": true
         },
-        "extends": "eslint:recommended",
+        "extends": "eslint:all",
         "parserOptions": {
             "sourceType": "module"
         },
@@ -24,11 +24,15 @@
             "wrap-regex": "off",
             "linebreak-style": ["error", "windows"],
             "max-len": ["error", 120],
+            "no-console": "off",
             "no-ternary": "off",
             "multiline-ternary": ["error", "always-multiline"],
             "no-multi-assign": "off",
             "padded-blocks": "off",
             "quote-props": ["error", "as-needed"],
+            "one-var": "off",
+            "no-magic-numbers": ["error", { "ignore": [0, 1, 2] }],
+            "capitalized-comments": ["error", "always", { "ignorePattern": "emojidump" }],
             "sort-keys": "off",
             "object-property-newline": ["error", { "allowAllPropertiesOnSameLine": true }],
             "space-before-function-paren": "off"

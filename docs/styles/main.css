@@ -1,17 +1,6 @@
 body {
     color: #000;
     font-family: Consolas, monaco, monospace;
-}
-
-p {
-    margin: 0 0 1rem 0;
-}
-
-.hidden {
-    display: none;
-}
-
-.main {
     padding: 1rem;
 }
 
@@ -20,12 +9,14 @@ p {
     font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", Times, Symbola, Aegyptus, Code2000, Code2001, Code2002, Musica, serif, LastResort;
     font-size: 2rem;
     line-height: 1.5;
-    margin-bottom: 2rem;
+    margin: 0;
     word-break: break-all;
 }
 
-.feedback--error {
+.dump--error {
     color: #FF0000;
+    font-family: Consolas, monaco, monospace;
+    font-size: 1rem;
     font-weight: bold;
 }
 

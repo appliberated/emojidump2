@@ -3,99 +3,77 @@
  *  https://www.hwalab.com/emojidump/
  */
 
-/* eslint-disable no-console, max-statements */
+/* eslint max-statements: ["error", 20],  */
 
 import * as helpers from "/scripts/helpers.js";
 import * as utils from "/scripts/utils.js";
-
-
-let sourceEmojis, curEmojis;
 
 /**
  * Get references to the required DOM elements.
  */
 const dumpEl = document.getElementById("dump");
-const feedbackEl = document.getElementById("feedback");
+
+/**
+ * Returns a summary message of the command.
+ * @param {Object} opt The current command options.
+ * @param {Number} count The emoji count.
+ * @returns {string} The summary of the command.
+ */
+function getSummary(opt, count) {
+    const maxStr = opt.max ? `${Math.min(opt.max, count).toLocaleString()} of ` : "";
+    const unicodeStr = opt.unicode ? ` Unicode ${opt.unicode.toFixed(1)}` : "";
+    const shuffleStr = opt.shuffle ? " shuffled" : "";
+    return `${maxStr}${count.toLocaleString()}${unicodeStr}${shuffleStr} emojis`;
+}
 
 /**
  * Performs the actual emojidump command.
- * @param {string} argString The command line arguments.
+ * @param {Array} emojis The source emoji array.
+ * @param {Object} params The URL query parameters.
  * @returns {void}
  */
-function execCommandInternal(urlParams) {
+function execCommand(emojis, params) {
 
-    for (let p of urlParams) {
-        console.log(p);
-    }
+    const opt = helpers.parseOptions(params);
+    console.log("URL Query Parameters\n", opt);
 
-    let value, valid, error, version, shuffle, max, join;
+    // Filter emojis by Unicode version, if the unicode option is set; by default display all emojis
+    let curEmojis = opt.unicode ? emojis.filter(el => el.v <= opt.unicode) : emojis.slice(0);
+    const count = curEmojis.length;
 
-    // Filter the emoji array by Unicode version, if the unicode option is present and has a valid value
-    ({ valid, value: version, error } = helpers.checkOption(urlParams, "unicode"));
-    if (valid === false) return error;
-    // By default display all emojis
-    curEmojis = valid ? sourceEmojis.filter(el => el.v <= version) : sourceEmojis.slice(0);
-    const len = curEmojis.length;
-
-    // Shuffle the emoji array if the shuffle option is on
-    ({ valid, value: shuffle, error } = helpers.checkOption(urlParams, "shuffle"));
-    if (valid === false) return error;
-    if (valid && shuffle) utils.shuffleArray(curEmojis);
+    // Shuffle emojis if the shuffle option is on
+    if (opt.shuffle) utils.shuffleArray(curEmojis);
 
     // Slice the emoji array, if the maximum option is present and has a valid value
-    ({ valid, value: max, error } = helpers.checkOption(urlParams, "max"));
-    if (valid === false) return error;
-    if (valid && max < curEmojis.length) curEmojis = max > 0 ? curEmojis.slice(0, max) : curEmojis.slice(max);
-
-    // Check if the join option is present and has a valid value
-    ({ valid, value: join, error } = helpers.checkOption(urlParams, "join"));
-    if (valid === false) return error;
-
-    // Dump the emojis, with no separator if the join option was passed
-    dumpEl.innerText = curEmojis.map(emoji => emoji.e).join(join ? "" : " ");
-
-    // Update the emoji font size, if the font size option is present and has a valid value
-    ({ valid, value, error } = helpers.checkOption(urlParams, "fontSize"));
-    if (valid === false) return error;
-    if (valid) dumpEl.style.fontSize = `${value}px`;
-
-    // Update the emoji line height, if the line height option is present and has a valid value
-    ({ valid, value, error } = helpers.checkOption(urlParams, "lineHeight"));
-    if (valid === false) return error;
-    if (valid) dumpEl.style.lineHeight = `${value}px`;
-
-    {   
-        // Update the emoji line height, if the line height option is present and has a valid value
-        const { valid, size, error } = helpers.checkOption(urlParams, "lineHeight");
-        if (valid === false) return error;
-        if (valid) dumpEl.style.lineHeight = `${size}px`;
+    if (opt.max && opt.max < curEmojis.length) {
+        curEmojis = opt.max > 0 ? curEmojis.slice(0, opt.max) : curEmojis.slice(opt.max);
     }
 
-    // Return success and a command summary message
-    // return { result: true, msg: helpers.commandFeedback(len, version, shuffle, max, join) };
-    return { result: true, msg: "" };
+    // Dump the emojis, with no separator if the join option is on
+    dumpEl.innerText = curEmojis.map(emoji => emoji.e).join(opt.join ? "" : " ");
+
+    // Update the emoji font size, if the font size option is set
+    if (opt.fontSize) dumpEl.style.fontSize = `${opt.fontSize}px`;
+
+    // Update the emoji letter spacing, if the letter spacing option is set
+    if (opt.letterSpacing) dumpEl.style.letterSpacing = `${opt.letterSpacing}px`;
+
+    // Update the emoji line height, if the line height option is set
+    if (opt.lineHeight) dumpEl.style.lineHeight = `${opt.lineHeight}px`;
+
+    // Update the document title with a command summary message
+    document.title = getSummary(opt, count);
 }
 
 /**
- * Executes the emojidump command with the current command line arguments.
- * @returns {void}
- */
-function execCommand() {
-    const { result, msg } = execCommandInternal(new URLSearchParams(location.search));
-
-    // On success: show the emoji dump, on failure show the help screen; update the message
-    dumpEl.classList.toggle("hidden", !result);
-    feedbackEl.innerText = msg;
-    feedbackEl.classList.toggle("feedback--error", !result);
-}
-
-/**
- * Shows an app error message to the user.
+ * Shows an error message to the user.
+ * @param {string} category The error category name.
  * @param {Object} error The error object.
  * @returns {void}
  */
-function showAppError(error) {
-    feedbackEl.innerText = `Cannot load emojis! ${error}`;
+function showError(category, error) {
+    dumpEl.innerText = `${category}: ${error.message}`;
+    dumpEl.classList.add("dump--error");
     console.error(error);
 }
 
@@ -104,6 +82,8 @@ function showAppError(error) {
  * @returns {void}
  */
 function initApp() {
+    console.log("%cemojidump", "background-color: #FFCC22; font-weight: bold; padding: 0.5rem 1rem; ");
+
     // Fetch the emoji JSON file; on success execute the emojidump command, on failure show error message
     fetch("/scripts/emoji.json")
         .then(response => {
@@ -111,10 +91,14 @@ function initApp() {
             return response.json();
         })
         .then(response => {
-            sourceEmojis = response;
-            execCommand();
+            try {
+                const params = new URLSearchParams(location.search);
+                execCommand(response, params);
+            } catch (error) {
+                showError("Command Error", error);
+            }
         })
-        .catch(error => showAppError(error));
+        .catch(error => showError("Emoji Load Error", error));
 }
 
 initApp();
