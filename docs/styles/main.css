@@ -1,7 +1,7 @@
 body {
     color: #000;
     font-family: Consolas, monaco, monospace;
-    padding: 1rem;
+    /* padding: 1rem; */
 }
 
 .dump {
@@ -13,10 +13,16 @@ body {
     word-break: break-all;
 }
 
+.dump--blendin {
+    color: #ffffff;
+}
+
 .dump--error {
-    color: #FF0000;
+    color: #CC1133;
     font-family: Consolas, monaco, monospace;
     font-size: 1rem;
     font-weight: bold;
+    margin: 1rem;
+    word-break: inherit;
 }
 

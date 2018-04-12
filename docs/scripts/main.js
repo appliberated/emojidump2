@@ -61,6 +61,9 @@ function execCommand(emojis, params) {
     // Update the emoji line height, if the line height option is set
     if (opt.lineHeight) dumpEl.style.lineHeight = `${opt.lineHeight}px`;
 
+    // Add the blend in class, if the blend in option is set
+    if (opt.blendIn) dumpEl.classList.add("dump--blendin");
+
     // Update the document title with a command summary message
     document.title = getSummary(opt, count);
 }
