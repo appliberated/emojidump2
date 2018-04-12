@@ -8,10 +8,6 @@
 import * as helpers from "/scripts/helpers.js";
 import * as utils from "/scripts/utils.js";
 
-// [...new Set(emojiList.map(item => item.v))].sort((a, b) => a - b).join(", ")
-const unicodeVersions = [1.1, 3.0, 3.2, 4.0, 4.1, 5.1, 5.2, 6.0, 6.1, 7.0, 8.0, 9.0, 10.0, 11.0];
-
-const MIN_ZOOM = 1, MAX_ZOOM = 7;
 
 let sourceEmojis, curEmojis;
 
@@ -27,43 +23,57 @@ const feedbackEl = document.getElementById("feedback");
  * @returns {void}
  */
 function execCommandInternal(urlParams) {
-    let valid, error, version, shuffle, max, join, zoom;
 
-    // By default display all emojis
-    curEmojis = sourceEmojis.slice(0);
+    for (let p of urlParams) {
+        console.log(p);
+    }
 
-    // Filter the emoji array by Unicode version if the unicode option is present and has a valid value
-    ({ valid, value: version, error } = helpers.checkOption(urlParams, "unicode", value => unicodeVersions.includes(value)));
+    let value, valid, error, version, shuffle, max, join;
+
+    // Filter the emoji array by Unicode version, if the unicode option is present and has a valid value
+    ({ valid, value: version, error } = helpers.checkOption(urlParams, "unicode"));
     if (valid === false) return error;
-    if (valid) curEmojis = curEmojis.filter(el => el.v <= version);
-    version = version || unicodeVersions[unicodeVersions.length - 1];
+    // By default display all emojis
+    curEmojis = valid ? sourceEmojis.filter(el => el.v <= version) : sourceEmojis.slice(0);
     const len = curEmojis.length;
 
     // Shuffle the emoji array if the shuffle option is on
-    ({ valid, value: shuffle, error } = helpers.checkOption(urlParams, "shuffle", value => typeof value == typeof true));
+    ({ valid, value: shuffle, error } = helpers.checkOption(urlParams, "shuffle"));
     if (valid === false) return error;
     if (valid && shuffle) utils.shuffleArray(curEmojis);
 
-    // Slice the emoji array if the maximum option is present and has a valid value
-    ({ valid, value: max, error } = helpers.checkOption(urlParams, "max", value => Number.isInteger(value)));
+    // Slice the emoji array, if the maximum option is present and has a valid value
+    ({ valid, value: max, error } = helpers.checkOption(urlParams, "max"));
     if (valid === false) return error;
-    if (valid && max < curEmojis.length) curEmojis = curEmojis.slice(0, max);
+    if (valid && max < curEmojis.length) curEmojis = max > 0 ? curEmojis.slice(0, max) : curEmojis.slice(max);
 
     // Check if the join option is present and has a valid value
-    ({ valid, value: join, error } = helpers.checkOption(urlParams, "join", value => typeof value == typeof true));
+    ({ valid, value: join, error } = helpers.checkOption(urlParams, "join"));
     if (valid === false) return error;
 
     // Dump the emojis, with no separator if the join option was passed
     dumpEl.innerText = curEmojis.map(emoji => emoji.e).join(join ? "" : " ");
 
-    // Apply zoom if the zoom option has a valid value
-    delete dumpEl.dataset.zoom;
-    ({ valid, value: zoom, error } = helpers.checkOption(urlParams, "zoom", value => utils.isIntegerBetween(value, MIN_ZOOM, MAX_ZOOM)));
+    // Update the emoji font size, if the font size option is present and has a valid value
+    ({ valid, value, error } = helpers.checkOption(urlParams, "fontSize"));
     if (valid === false) return error;
-    if (valid) dumpEl.dataset.zoom = zoom;
+    if (valid) dumpEl.style.fontSize = `${value}px`;
+
+    // Update the emoji line height, if the line height option is present and has a valid value
+    ({ valid, value, error } = helpers.checkOption(urlParams, "lineHeight"));
+    if (valid === false) return error;
+    if (valid) dumpEl.style.lineHeight = `${value}px`;
+
+    {   
+        // Update the emoji line height, if the line height option is present and has a valid value
+        const { valid, size, error } = helpers.checkOption(urlParams, "lineHeight");
+        if (valid === false) return error;
+        if (valid) dumpEl.style.lineHeight = `${size}px`;
+    }
 
     // Return success and a command summary message
-    return { result: true, msg: helpers.commandFeedback(len, version, shuffle, max, join, zoom) };
+    // return { result: true, msg: helpers.commandFeedback(len, version, shuffle, max, join) };
+    return { result: true, msg: "" };
 }
 
 /**

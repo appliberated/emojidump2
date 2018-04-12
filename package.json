@@ -10,7 +10,7 @@
             "browser": true,
             "es6": true
         },
-        "extends": "eslint:all",
+        "extends": "eslint:recommended",
         "parserOptions": {
             "sourceType": "module"
         },
@@ -21,6 +21,7 @@
             "curly": ["error", "multi-line"],
             "object-curly-spacing": "off",
             "func-style": "off",
+            "wrap-regex": "off",
             "linebreak-style": ["error", "windows"],
             "max-len": ["error", 120],
             "no-ternary": "off",
